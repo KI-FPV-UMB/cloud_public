@@ -12,6 +12,7 @@ public class WeatherController {
         this.weatherService = weatherService;
     }
 
+    // http://localhost:8080/weather?city=Berlin
     @GetMapping(value  = "/weather", produces = "application/json")
     public String getWeather(@RequestParam String city) {
         return weatherService.getWeather(city);
