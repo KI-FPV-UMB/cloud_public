@@ -1,0 +1,62 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookstore App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="#">Bookstore Monitor</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">About</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="text-center">Real-time Bookstore Events</h1>
+    <div id="bookUpdatesDiv" class="mt-4"></div>
+</div>
+<script>
+    const bookUpdatesDiv = document.getElementById("bookUpdates");
+
+    function connect() {
+        const socket = new SockJS('http://localhost:8081/ws');
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected to: ' + frame);
+            stompClient.subscribe('/topic/bookUpdates', function (bookEvent) {
+                const event = JSON.parse(bookEvent.body);
+                console.log(event); // Log the received event
+
+                const message = document.createElement('div');
+                message.textContent = `Book Event: ${event.type} - ${event.title}, Price: ${event.price}`;
+                document.getElementById('bookUpdatesDiv').appendChild(message);
+                console.log(bookUpdatesDiv.innerHTML); // Log the content of the div
+            });
+        });
+    }
+
+    connect();
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+    </html>
+</body>
+</html>
