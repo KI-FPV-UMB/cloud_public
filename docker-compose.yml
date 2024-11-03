@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # RabbitMQ service port
+      - "15672:15672" # Management UI
+
+# You can access the RabbitMQ Management UI at http://localhost:15672 (default username and password are guest/guest
