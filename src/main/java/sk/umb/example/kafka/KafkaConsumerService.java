@@ -1,6 +1,5 @@
 package sk.umb.example.kafka;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -8,6 +7,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -20,15 +21,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class KafkaConsumerService implements MessageConsumerService {
+public class KafkaConsumerService implements MessageConsumerService, ApplicationListener<ContextRefreshedEvent> {
 
     private KafkaConsumer<String, String> consumer;
     private final List<MessageListener> listeners = new ArrayList<>();
     private ExecutorService executorService;
     private volatile boolean running = true;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "my-group");
@@ -55,8 +56,10 @@ public class KafkaConsumerService implements MessageConsumerService {
                     }
                 }
             } catch (WakeupException e) {
+                System.err.println("WakeupException: Poller thread encountered an error: " + e.getMessage());
+                running = false;
             } catch (Exception e) {
-                System.err.println("Poller thread encountered an error: " + e.getMessage());
+                System.err.println("Exception: Poller thread encountered an error: " + e.getMessage());
                 running = false;
             }
         });
